@@ -1,6 +1,6 @@
 inputs:
   - name: rsIdentifies
-    table: RUDDERSTACK_TEST_DB.DATA_APPS_SIMULATED_SHOPIFY.IDENTIFIES
+    table: PROFILES_DEMO_DB.RUDDERSTACK.IDENTIFIES
     occurred_at_col: timestamp
     ids:
       - select: "user_id"
@@ -29,7 +29,7 @@ inputs:
       role: "*"
       category: "webhook|null"
   - name: rsTracks
-    table: RUDDERSTACK_TEST_DB.DATA_APPS_SIMULATED_SHOPIFY.TRACKS
+    table: PROFILES_DEMO_DB.RUDDERSTACK.TRACKS
     occurred_at_col: timestamp
     ids:
       - select: "user_id"
@@ -48,7 +48,7 @@ inputs:
       role: "*"
       category: "webhook|null"
   - name: rsPages
-    table: RUDDERSTACK_TEST_DB.DATA_APPS_SIMULATED_SHOPIFY.PAGES
+    table: PROFILES_DEMO_DB.RUDDERSTACK.PAGES
     occurred_at_col: timestamp
     ids:
       - select: "user_id"

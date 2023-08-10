@@ -1,0 +1,72 @@
+inputs:
+  - name: rsIdentifies
+    table: RUDDERSTACK_TEST_DB.DATA_APPS_SIMULATED_SHOPIFY.IDENTIFIES
+    occurred_at_col: timestamp
+    ids:
+      - select: "user_id"
+        type: user_id
+        entity: user
+      - select: "anonymous_id"
+        type: anonymous_id
+        entity: user
+      - select: "lower(email)"
+        type: email
+        entity: user
+      #Repeat the above but for an account  
+      - select: "user_id"
+        type: user_id
+        entity: account
+      - select: "anonymous_id"
+        type: anonymous_id
+        entity: account
+      - select: "lower(email)"
+        type: email
+        entity: account
+      - select: "lower(split_part(email, '@', 2))"
+        type: domain
+        entity: account
+    source_metadata:
+      role: "*"
+      category: "webhook|null"
+  - name: rsTracks
+    table: RUDDERSTACK_TEST_DB.DATA_APPS_SIMULATED_SHOPIFY.TRACKS
+    occurred_at_col: timestamp
+    ids:
+      - select: "user_id"
+        type: user_id
+        entity: user
+      - select: "anonymous_id"
+        type: anonymous_id
+        entity: user
+      - select: "user_id"
+        type: user_id
+        entity: account
+      - select: "anonymous_id"
+        type: anonymous_id
+        entity: account
+    source_metadata:
+      role: "*"
+      category: "webhook|null"
+  - name: rsPages
+    table: RUDDERSTACK_TEST_DB.DATA_APPS_SIMULATED_SHOPIFY.PAGES
+    occurred_at_col: timestamp
+    ids:
+      - select: "user_id"
+        type: user_id
+        entity: user
+      - select: "anonymous_id"
+        type: anonymous_id
+        entity: user
+      - select: "user_id"
+        type: user_id
+        entity: account
+      - select: "anonymous_id"
+        type: anonymous_id
+        entity: account
+    source_metadata:
+      role: "*"
+      category: "webhook|null"
+
+
+
+

@@ -1,29 +1,32 @@
 # Project name
 name: base_features
-
 # Project's yaml schema version
-schema_version: 38
-
+schema_version: 42
 # WH Connection Profile to use.
 connection: dev_wh
-
 # Whether to allow inputs having no timestamps,
 # if true, data without timestamps are included when running models
 include_untimed: true
-
 # Model folders to use.
-model_folders: 
+model_folders:
   - models
- 
 # Entities in this project and their ids.
 entities:
   - name: user
     id_stitcher: models/user_id_graph_sample
+    id_column_name: profile_id
     id_types:
-      - user_id 
+      - user_id
       - anonymous_id
       - email
-
+  - name: user_recent
+    id_stitcher: models/user_id_graph_sample_recent
+    id_column_name: profile_id
+    id_types:
+      - user_id
+      - anonymous_id
+      - email
+      - pid
   - name: account
     id_stitcher: models/account_id_graph_sample
     id_types:
@@ -31,9 +34,8 @@ entities:
       - anonymous_id
       - email
       - domain
-
-
 id_types:
+  - name: pid
   - name: user_id
   - name: domain
     filters:

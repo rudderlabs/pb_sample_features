@@ -1,4 +1,4 @@
-models:  
+models:
   - name: rsTracksUnionPages
     model_type: sql_template
     model_spec:
@@ -22,12 +22,163 @@ models:
         - select: "user_id"
           type: user_id
           entity: user
+          to_default_stitcher: true
         - select: "anonymous_id"
           type: anonymous_id
           entity: user
+          to_default_stitcher: true
         - select: "user_id"
           type: user_id
           entity: account
+          to_default_stitcher: true
         - select: "anonymous_id"
           type: anonymous_id
-          entity: account  
+          entity: account
+          to_default_stitcher: true
+        - select: "user_id"
+          type: user_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: user_recent
+          to_default_stitcher: true
+
+  - name: rsIdentifies_recent
+    model_type: sql_template
+    model_spec:
+      occurred_at_col: timestamp
+      validity_time: 24h # 1 day
+      materialization:
+        output_type: ephemeral
+        run_type: discrete
+      single_sql: |
+        {% with ID = this.DeRef("inputs/rsIdentifies")  %}
+        select * from {{ID}} where timestamp::timestamp  > (Select valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE limit 1)
+        {% endwith %}
+      ids:
+        - select: user_id
+          type: user_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: anonymous_id
+          type: anonymous_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: lower(email)
+          type: email
+          entity: user_recent
+          to_default_stitcher: true
+
+  - name: rsTracks_recent
+    model_type: sql_template
+    model_spec:
+      occurred_at_col: timestamp
+      validity_time: 24h # 1 day
+      materialization:
+        output_type: ephemeral
+        run_type: discrete
+      single_sql: |
+          {% with TRACKS = this.DeRef("inputs/rsTracks") %}
+          select * from {{TRACKS}} where timestamp::timestamp  > (Select valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE limit 1)
+          {% endwith %}
+      ids:
+        - select: user_id
+          type: user_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: anonymous_id
+          type: anonymous_id
+          entity: user_recent
+          to_default_stitcher: true
+
+  - name: rsPages_recent
+    model_type: sql_template
+    model_spec:
+      occurred_at_col: timestamp
+      validity_time: 24h # 1 day
+      materialization:
+        output_type: ephemeral
+        run_type: discrete
+      single_sql: |
+          {% with PAGES = this.DeRef("inputs/rsPages")  %}
+          select * from {{PAGES}} where timestamp::timestamp  > (Select valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE limit 1)
+          {% endwith %}
+      ids:
+        - select: user_id
+          type: user_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: anonymous_id
+          type: anonymous_id
+          entity: user_recent
+          to_default_stitcher: true
+
+  - name: rsIDGraph
+    model_type: sql_template
+    model_spec:
+      occurred_at_col: timestamp
+      validity_time: 24h # 1 day
+      materialization:
+        output_type: ephemeral
+        run_type: discrete
+      single_sql: |
+        {% with Users = this.DeRef("models/user_id_graph_sample") %}  
+                Select distinct profile_id as pid
+                    , case when other_id_type = 'user_id' then other_id end as user_id
+                    , case when other_id_type = 'anonymous_id' then other_id end as anonymous_id
+                    , case when other_id_type = 'email' then other_id end as email
+                    , valid_at as timestamp
+                From PROFILES_DEMO_DB.RS_PROFILES.user_id_graph_sample 
+                where profile_id IN (
+                    -- 2) Find the profile id's for those in the ID Graph as we want to pull the full profile for those users 
+                    Select distinct profile_id 
+                    from PROFILES_DEMO_DB.RS_PROFILES.user_id_graph_sample 
+                    where other_id||other_id_type in 
+                    (   
+                    -- 1) Find all of the other_id_types across our sources for new activity.  New activity is activity that happened since our last profiles table was run
+                    select anonymous_id || 'anonymous_id'
+                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies 
+                    where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
+                    union 
+                    select user_id || 'user_id'
+                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies 
+                    where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
+                    union 
+                    select email || 'email'
+                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies 
+                    where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
+                    union 
+                    select anonymous_id || 'anonymous_id'
+                    from PROFILES_DEMO_DB.RUDDERSTACK.pages 
+                    where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
+                    union 
+                    select user_id || 'user_id'
+                    from PROFILES_DEMO_DB.RUDDERSTACK.pages 
+                    where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
+                    union 
+                    select anonymous_id || 'anonymous_id'
+                    from PROFILES_DEMO_DB.RUDDERSTACK.tracks  
+                    where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
+                    union 
+                    select user_id || 'user_id'
+                    from PROFILES_DEMO_DB.RUDDERSTACK.tracks 
+                    where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
+                )
+                )
+        {% endwith %} 
+      #The ID Graph of all of your users.    
+      ids:
+        - select: user_id
+          type: user_id
+          entity: user_recent
+        - select: anonymous_id
+          type: anonymous_id
+          entity: user_recent
+        - select: email
+          type: email
+          entity: user_recent
+        - select: pid
+          type: pid
+          entity: user_recent
+

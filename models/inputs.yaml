@@ -1,72 +1,147 @@
 inputs:
   - name: rsIdentifies
-    table: PROFILES_DEMO_DB.RUDDERSTACK.IDENTIFIES
-    occurred_at_col: timestamp
-    ids:
-      - select: "user_id"
-        type: user_id
-        entity: user
-      - select: "anonymous_id"
-        type: anonymous_id
-        entity: user
-      - select: "lower(email)"
-        type: email
-        entity: user
-      #Repeat the above but for an account  
-      - select: "user_id"
-        type: user_id
-        entity: account
-      - select: "anonymous_id"
-        type: anonymous_id
-        entity: account
-      - select: "lower(email)"
-        type: email
-        entity: account
-      - select: "lower(split_part(email, '@', 2))"
-        type: domain
-        entity: account
     source_metadata:
       role: "*"
       category: "webhook|null"
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+        - user_recent
+        - account
+      with_columns:
+        - name: timestamp
+        - name: user_id
+        - name: anonymous_id
+        - name: email
+    app_defaults:
+      table: PROFILES_DEMO_DB.RUDDERSTACK.IDENTIFIES
+      occurred_at_col: timestamp
+      ids:
+        - select: "user_id"
+          type: user_id
+          entity: user
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: user
+          to_default_stitcher: true
+        - select: "lower(email)"
+          type: email
+          entity: user
+          to_default_stitcher: true
+        - select: "user_id"
+          type: user_id
+          entity: account
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: account
+          to_default_stitcher: true
+        - select: "lower(email)"
+          type: email
+          entity: account
+          to_default_stitcher: true
+        - select: "lower(split_part(email, '@', 2))"
+          type: domain
+          entity: account
+          to_default_stitcher: true
+        - select: "user_id"
+          type: user_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: "lower(email)"
+          type: email
+          entity: user_recent
+          to_default_stitcher: true
   - name: rsTracks
-    table: PROFILES_DEMO_DB.RUDDERSTACK.TRACKS
-    occurred_at_col: timestamp
-    ids:
-      - select: "user_id"
-        type: user_id
-        entity: user
-      - select: "anonymous_id"
-        type: anonymous_id
-        entity: user
-      - select: "user_id"
-        type: user_id
-        entity: account
-      - select: "anonymous_id"
-        type: anonymous_id
-        entity: account
     source_metadata:
       role: "*"
       category: "webhook|null"
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+        - user_recent
+        - account
+      with_columns:
+        - name: timestamp
+        - name: user_id
+        - name: anonymous_id
+    app_defaults:
+      table: PROFILES_DEMO_DB.RUDDERSTACK.TRACKS
+      occurred_at_col: timestamp
+      ids:
+        - select: "user_id"
+          type: user_id
+          entity: user
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: user
+          to_default_stitcher: true
+        - select: "user_id"
+          type: user_id
+          entity: account
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: account
+          to_default_stitcher: true
+        - select: "user_id"
+          type: user_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: user_recent
+          to_default_stitcher: true
   - name: rsPages
-    table: PROFILES_DEMO_DB.RUDDERSTACK.PAGES
-    occurred_at_col: timestamp
-    ids:
-      - select: "user_id"
-        type: user_id
-        entity: user
-      - select: "anonymous_id"
-        type: anonymous_id
-        entity: user
-      - select: "user_id"
-        type: user_id
-        entity: account
-      - select: "anonymous_id"
-        type: anonymous_id
-        entity: account
     source_metadata:
       role: "*"
       category: "webhook|null"
-
-
-
-
+    contract:
+      is_optional: false
+      is_event_stream: true
+      with_entity_ids:
+        - user
+        - user_recent
+        - account
+      with_columns:
+        - name: timestamp
+        - name: user_id
+        - name: anonymous_id
+    app_defaults:
+      table: PROFILES_DEMO_DB.RUDDERSTACK.PAGES
+      occurred_at_col: timestamp
+      ids:
+        - select: "user_id"
+          type: user_id
+          entity: user
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: user
+          to_default_stitcher: true
+        - select: "user_id"
+          type: user_id
+          entity: account
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: account
+          to_default_stitcher: true
+        - select: "user_id"
+          type: user_id
+          entity: user_recent
+          to_default_stitcher: true
+        - select: "anonymous_id"
+          type: anonymous_id
+          entity: user_recent
+          to_default_stitcher: true

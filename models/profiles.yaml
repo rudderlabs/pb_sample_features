@@ -311,7 +311,7 @@ models:
             name: active_days_in_past_365_days
             select: count(distinct date(timestamp))
             from: models/rsTracksUnionPages
-            where: "{{macro_datediff_n('timestamp','365')}}"
+            where: "{{macro_datediff_n('timestamp','365')}}" 
             description: Out of 365 days, how many days have recorded an event till date including today
         - entity_var:
             name: last_seen_date

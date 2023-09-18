@@ -9,16 +9,16 @@ models:
         - from: inputs/rsTracks
         - from: inputs/rsPages
         
-  - name: user_id_graph_sample_recent
-    model_type: id_stitcher
-    model_spec:
-      validity_time: 24h # 1 day
-      entity_key: user_recent
-      edge_sources:
-        - from: models/rsIdentifies_recent
-        - from: models/rsTracks_recent
-        - from: models/rsPages_recent
-        - from: models/rsIDGraph
+  # - name: user_id_graph_sample_recent
+  #   model_type: id_stitcher
+  #   model_spec:
+  #     validity_time: 24h # 1 day
+  #     entity_key: user_recent
+  #     edge_sources:
+  #       - from: models/rsIdentifies_recent
+  #       - from: models/rsTracks_recent
+  #       - from: models/rsPages_recent
+  #       - from: models/rsIDGraph
 
   - name: account_id_graph_sample
     model_type: id_stitcher
@@ -285,63 +285,64 @@ models:
         - mediums_list
         - sources_list
 
-  - name: user_profile_sample_recent
-    model_type: feature_table_model
-    model_spec:
-      validity_time: 24h # 1 day
-      entity_key: user_recent
-      macros:
-        - name: macro_datediff
-          inputs:
-            - column
-          value: "{% if !(end_time|isnil) %} datediff(day, date({{column}}), date('{{end_time.Format(\"2006-01-02 15:04:05\")}}')) {% else %} datediff(day, date({{column}}::timestamp), GETDATE()) {% endif %}"
-        - name: macro_datediff_n
-          inputs:
-            - column
-            - number_of_days
-          value: "{% if !(end_time|isnil) %} datediff(day, date({{column}}), date('{{end_time.Format(\"2006-01-02 15:04:05\")}}')) <={{number_of_days}} {% else %} datediff(day, date({{column}}), GETDATE()) <= {{number_of_days}} {% endif %}"
-      vars:
-        - entity_var:
-            name: active_days_in_past_7_days
-            select: count(distinct date(timestamp))
-            from: models/rsTracksUnionPages
-            where: "{{macro_datediff_n('timestamp','7')}}"
-            description: Out of 7 days, how many days have recorded an event till date including today
-        - entity_var:
-            name: active_days_in_past_365_days
-            select: count(distinct date(timestamp))
-            from: models/rsTracksUnionPages
-            where: "{{macro_datediff_n('timestamp','365')}}" 
-            description: Out of 365 days, how many days have recorded an event till date including today
-        - entity_var:
-            name: last_seen_date
-            from: models/rsTracksUnionPages
-            select: max(date(timestamp))
-            description: The latest date on which an event has been recorded by the user
-        - entity_var:
-            name: last_campaign_name
-            from: inputs/rsPages
-            select: last_value(context_campaign_name)
-            window:
-              order_by:
-                - timestamp asc
-            where: context_campaign_name is not null and context_campaign_name!=''
-            description: Latest campaign from which a user has visited the app
-        - entity_var:
-            name: last_source_name
-            from: inputs/rsPages
-            select: last_value(context_campaign_source)
-            window:
-              order_by:
-                - timestamp asc
-            where: context_campaign_source is not null and context_campaign_source!=''
-            description: Last source from which a user has visited the app
-      features:
-        - active_days_in_past_7_days
-        - active_days_in_past_365_days
-        - last_seen_date
-        - last_campaign_name
-        - last_source_name
+  # - name: user_profile_sample_recent
+  #   model_type: feature_table_model
+  #   model_spec:
+  #     validity_time: 24h # 1 day
+  #     entity_key: user_recent
+  #     macros:
+  #       - name: macro_datediff
+  #         inputs:
+  #           - column
+  #         value: "{% if !(end_time|isnil) %} datediff(day, date({{column}}), date('{{end_time.Format(\"2006-01-02 15:04:05\")}}')) {% else %} datediff(day, date({{column}}::timestamp), GETDATE()) {% endif %}"
+  #       - name: macro_datediff_n
+  #         inputs:
+  #           - column
+  #           - number_of_days
+  #         value: "{% if !(end_time|isnil) %} datediff(day, date({{column}}), date('{{end_time.Format(\"2006-01-02 15:04:05\")}}')) <={{number_of_days}} {% else %} datediff(day, date({{column}}), GETDATE()) <= {{number_of_days}} {% endif %}"
+  #     vars:
+  #       - entity_var:
+  #           name: active_days_in_past_7_days
+  #           select: count(distinct date(timestamp))
+  #           from: models/rsTracksUnionPages
+  #           where: "{{macro_datediff_n('timestamp','7')}}"
+  #           description: Out of 7 days, how many days have recorded an event till date including today
+  #       - entity_var:
+  #           name: active_days_in_past_365_days
+  #           select: count(distinct date(timestamp))
+  #           from: models/rsTracksUnionPages
+  #           where: "{{macro_datediff_n('timestamp','365')}}" 
+  #           description: Out of 365 days, how many days have recorded an event till date including today
+  #       - entity_var:
+  #           name: last_seen_date
+  #           from: models/rsTracksUnionPages
+  #           select: max(date(timestamp))
+  #           description: The latest date on which an event has been recorded by the user
+  #       - entity_var:
+  #           name: last_campaign_name
+  #           from: inputs/rsPages
+  #           select: last_value(context_campaign_name)
+  #           window:
+  #             order_by:
+  #               - timestamp asc
+  #           where: context_campaign_name is not null and context_campaign_name!=''
+  #           description: Latest campaign from which a user has visited the app
+  #       - entity_var:
+  #           name: last_source_name
+  #           from: inputs/rsPages
+  #           select: last_value(context_campaign_source)
+  #           window:
+  #             order_by:
+  #               - timestamp asc
+  #           where: context_campaign_source is not null and context_campaign_source!=''
+  #           description: Last source from which a user has visited the app
+  #     features:
+  #       - active_days_in_past_7_days
+  #       - active_days_in_past_365_days
+  #       - last_seen_date
+  #       - last_campaign_name
+  #       - last_source_name
+
 
   - name: account_profile_sample
     model_type: feature_table_model

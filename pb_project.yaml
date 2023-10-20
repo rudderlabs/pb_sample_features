@@ -1,7 +1,7 @@
 # Project name
 name: base_features
 # Project's yaml schema version
-schema_version: 42
+schema_version: 44
 # WH Connection Profile to use.
 connection: dev_wh
 # Whether to allow inputs having no timestamps,
@@ -19,6 +19,12 @@ entities:
       - user_id
       - anonymous_id
       - email
+    serve_traits:
+      - id_served: email
+        name: user_profile_sample_by_email
+      - id_served: user_id
+        name: user_profile_sample_by_user_id
+  
   - name: user_recent
     id_stitcher: models/user_id_graph_sample_recent
     id_column_name: profile_id
@@ -27,6 +33,7 @@ entities:
       - anonymous_id
       - email
       - pid
+
   - name: account
     id_stitcher: models/account_id_graph_sample
     id_types:

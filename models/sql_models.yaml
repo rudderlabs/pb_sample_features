@@ -10,13 +10,13 @@ models:
         {% with Tracks = this.DeRef("inputs/rsTracks") Pages = this.DeRef("inputs/rsPages") %}
             select user_id, anonymous_id, context_session_id, timestamp from (
             select ANONYMOUS_ID,USER_ID,timestamp::date as dt,CONTEXT_SESSION_ID,min(timestamp) as timestamp from {{Tracks}} group by user_id, anonymous_id, context_session_id, timestamp::date
-            union all 
+            union all
             select ANONYMOUS_ID,USER_ID,timestamp::date as dt,CONTEXT_SESSION_ID,max(timestamp) as timestamp from {{Tracks}} group by user_id, anonymous_id, context_session_id, timestamp::date) a
             union all
-            select user_id, anonymous_id, context_session_id, timestamp from        
+            select user_id, anonymous_id, context_session_id, timestamp from
             (select ANONYMOUS_ID,USER_ID,timestamp::date as dt,CONTEXT_SESSION_ID,min(timestamp) as timestamp from {{Pages}} group by user_id, anonymous_id, context_session_id, timestamp::date
-            union all 
-            select ANONYMOUS_ID,USER_ID,timestamp::date as dt,CONTEXT_SESSION_ID,max(timestamp) as timestamp from {{Pages}} group by user_id, anonymous_id, context_session_id, timestamp::date) 
+            union all
+            select ANONYMOUS_ID,USER_ID,timestamp::date as dt,CONTEXT_SESSION_ID,max(timestamp) as timestamp from {{Pages}} group by user_id, anonymous_id, context_session_id, timestamp::date)
         {% endwith %}
       ids:
         - select: "user_id"
@@ -43,7 +43,6 @@ models:
           type: anonymous_id
           entity: user_recent
           to_default_stitcher: true
-
   - name: rsIdentifies_recent
     model_type: sql_template
     model_spec:
@@ -69,7 +68,6 @@ models:
           type: email
           entity: user_recent
           to_default_stitcher: true
-
   - name: rsTracks_recent
     model_type: sql_template
     model_spec:
@@ -79,9 +77,9 @@ models:
         output_type: ephemeral
         run_type: discrete
       single_sql: |
-          {% with TRACKS = this.DeRef("inputs/rsTracks") %}
-          select * from {{TRACKS}} where timestamp::timestamp  > (Select valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE limit 1)
-          {% endwith %}
+        {% with TRACKS = this.DeRef("inputs/rsTracks") %}
+        select * from {{TRACKS}} where timestamp::timestamp  > (Select valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE limit 1)
+        {% endwith %}
       ids:
         - select: user_id
           type: user_id
@@ -91,7 +89,6 @@ models:
           type: anonymous_id
           entity: user_recent
           to_default_stitcher: true
-
   - name: rsPages_recent
     model_type: sql_template
     model_spec:
@@ -101,9 +98,9 @@ models:
         output_type: ephemeral
         run_type: discrete
       single_sql: |
-          {% with PAGES = this.DeRef("inputs/rsPages")  %}
-          select * from {{PAGES}} where timestamp::timestamp  > (Select valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE limit 1)
-          {% endwith %}
+        {% with PAGES = this.DeRef("inputs/rsPages")  %}
+        select * from {{PAGES}} where timestamp::timestamp  > (Select valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE limit 1)
+        {% endwith %}
       ids:
         - select: user_id
           type: user_id
@@ -113,7 +110,6 @@ models:
           type: anonymous_id
           entity: user_recent
           to_default_stitcher: true
-
   - name: rsIDGraph
     model_type: sql_template
     model_spec:
@@ -123,51 +119,51 @@ models:
         output_type: ephemeral
         run_type: discrete
       single_sql: |
-        {% with Users = this.DeRef("models/user_id_graph_sample") %}  
+        {% with Users = this.DeRef("models/user_id_graph_sample") %}
                 Select distinct profile_id as pid
                     , case when other_id_type = 'user_id' then other_id end as user_id
                     , case when other_id_type = 'anonymous_id' then other_id end as anonymous_id
                     , case when other_id_type = 'email' then other_id end as email
                     , valid_at as timestamp
-                From PROFILES_DEMO_DB.RS_PROFILES.user_id_graph_sample 
+                From PROFILES_DEMO_DB.RS_PROFILES.user_id_graph_sample
                 where profile_id IN (
-                    -- 2) Find the profile id's for those in the ID Graph as we want to pull the full profile for those users 
-                    Select distinct profile_id 
-                    from PROFILES_DEMO_DB.RS_PROFILES.user_id_graph_sample 
-                    where other_id||other_id_type in 
-                    (   
+                    -- 2) Find the profile id's for those in the ID Graph as we want to pull the full profile for those users
+                    Select distinct profile_id
+                    from PROFILES_DEMO_DB.RS_PROFILES.user_id_graph_sample
+                    where other_id||other_id_type in
+                    (
                     -- 1) Find all of the other_id_types across our sources for new activity.  New activity is activity that happened since our last profiles table was run
                     select anonymous_id || 'anonymous_id'
-                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies 
+                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies
                     where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
-                    union 
+                    union
                     select user_id || 'user_id'
-                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies 
+                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies
                     where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
-                    union 
+                    union
                     select email || 'email'
-                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies 
+                    from PROFILES_DEMO_DB.RUDDERSTACK.identifies
                     where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
-                    union 
+                    union
                     select anonymous_id || 'anonymous_id'
-                    from PROFILES_DEMO_DB.RUDDERSTACK.pages 
+                    from PROFILES_DEMO_DB.RUDDERSTACK.pages
                     where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
-                    union 
+                    union
                     select user_id || 'user_id'
-                    from PROFILES_DEMO_DB.RUDDERSTACK.pages 
+                    from PROFILES_DEMO_DB.RUDDERSTACK.pages
                     where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
-                    union 
+                    union
                     select anonymous_id || 'anonymous_id'
-                    from PROFILES_DEMO_DB.RUDDERSTACK.tracks  
+                    from PROFILES_DEMO_DB.RUDDERSTACK.tracks
                     where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
-                    union 
+                    union
                     select user_id || 'user_id'
-                    from PROFILES_DEMO_DB.RUDDERSTACK.tracks 
+                    from PROFILES_DEMO_DB.RUDDERSTACK.tracks
                     where timestamp::timestamp > (select distinct valid_at from PROFILES_DEMO_DB.RS_PROFILES.USER_PROFILE_SAMPLE)
                 )
                 )
-        {% endwith %} 
-      #The ID Graph of all of your users.    
+        {% endwith %}
+      #The ID Graph of all of your users.
       ids:
         - select: user_id
           type: user_id
@@ -181,4 +177,3 @@ models:
         - select: pid
           type: pid
           entity: user_recent
-

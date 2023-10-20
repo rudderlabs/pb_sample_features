@@ -270,8 +270,7 @@ models:
         - campaigns_list
         - mediums_list
         - sources_list
-      compatibility_mode:
-        linear_dependency_of_vars: true
+
   # - name: user_profile_sample_recent
   #   model_type: feature_table_model
   #   model_spec:
@@ -572,5 +571,3 @@ models:
         - campaigns_list
         - mediums_list
         - sources_list
-      compatibility_mode:
-        linear_dependency_of_vars: true

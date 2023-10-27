@@ -27,7 +27,7 @@ models:
       predict:
         inputs: *inputs
         config:
-          data: *model_data_input_configs
+          data: *model_data_configs
           outputs:
             column_names:
               percentile: &percentile_name percentile_churn_score_7_days

@@ -1,0 +1,40 @@
+# This is a sample file, for detailed reference see: https://rudderlabs.github.io/pywht/
+models:
+  - name: &model_name user_churn
+    model_type: python_model
+    model_spec:
+      occurred_at_col: insert_ts
+      entity_key: user
+      validity_time: 24h # 1 day
+      py_repo_url: git@github.com:rudderlabs/rudderstack-profiles-classifier.git
+
+      train:
+        file_extension: .json
+        file_validity: 168h # If the last trained model is older than this, then the model will be trained again,
+
+        inputs: &inputs
+          - models/user_profile_sample # inputs to materialise the required data for model
+        config:
+          data: &model_data_configs
+            label_column: is_churned_7_days # Name of column for which we want to find predictions
+            label_value: 1 # Value of label column for which prediction is generated
+            prediction_horizon_days: 7 # Number of days in future for which we want to predict
+            features_profiles_model: 'user_profile_sample' # Model name
+            output_profiles_ml_model: *model_name # Name of output model based on current model to dinstinguish between multiple models
+            eligible_users: total_sessions_90_days > 0 # We do not need to predict churn for users who have already clearly churned
+            inputs: *inputs
+
+      predict:
+        inputs: *inputs
+        config:
+          data: *model_data_input_configs
+          outputs:
+            column_names:
+              percentile: &percentile_name percentile_churn_score_7_days
+              score: churn_score_7_days
+            feature_meta_data: &feature_meta_data
+              features:
+                - name: *percentile_name
+                  description: 'Percentile of churn score. Higher the percentile, higher the probability of churn'
+
+      <<: *feature_meta_data
